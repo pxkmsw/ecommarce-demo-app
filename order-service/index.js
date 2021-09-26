@@ -5,7 +5,15 @@ const mongoose = require("mongoose");
 const Order = require("./Order");
 const amqp = require("amqplib");
 const isAuthenticated = require("../isAuthenticated");
+const cors=require("cors");
 
+const corsOptions ={
+    origin:'*',
+    credentials:true,            //access-control-allow-credentials:true
+    optionSuccessStatus:200,
+}
+
+app.use(cors(corsOptions)) // Use this after the variable declaration
 var channel, connection;
 
 mongoose.connect(
@@ -44,6 +52,7 @@ connect().then(() => {
     channel.consume("ORDER", (data) => {
         console.log("Consuming ORDER service");
         const { products, userEmail } = JSON.parse(data.content);
+        console.log(products);
         const newOrder = createOrder(products, userEmail);
         channel.ack(data);
         channel.sendToQueue(

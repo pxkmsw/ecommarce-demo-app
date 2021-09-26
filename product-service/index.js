@@ -6,11 +6,20 @@ const Product = require("./Product");
 const jwt = require("jsonwebtoken");
 const amqp = require("amqplib");
 const isAuthenticated = require("../isAuthenticated");
-var order;
 
-var channel, connection;
+const cors=require("cors");
+const corsOptions ={
+    origin:'*',
+    credentials:true,            //access-control-allow-credentials:true
+    optionSuccessStatus:200,
+}
 
+app.use(cors(corsOptions)) // Use this after the variable declaration
 app.use(express.json());
+
+let order;
+let channel, connection;
+
 mongoose.connect(
     "mongodb://localhost/product-service",
     {
@@ -30,15 +39,17 @@ async function connect() {
 }
 connect();
 
-app.post("/product/buy", isAuthenticated, async (req, res) => {
+app.post("/product/buy", async (req, res) => {
     const { ids } = req.body;
+    console.log(ids);
     const products = await Product.find({ _id: { $in: ids } });
+    console.log(products);
     channel.sendToQueue(
         "ORDER",
         Buffer.from(
             JSON.stringify({
                 products,
-                userEmail: req.user.email,
+                userEmail: 'amit@gmail.com',
             })
         )
     );
@@ -48,8 +59,9 @@ app.post("/product/buy", isAuthenticated, async (req, res) => {
     return res.json(order);
 });
 
-app.post("/product/create", isAuthenticated, async (req, res) => {
+app.post("/product/create", async (req, res) => {
     const { name, description, price } = req.body;
+    console.log(req.body);
     const newProduct = new Product({
         name,
         description,
@@ -59,9 +71,9 @@ app.post("/product/create", isAuthenticated, async (req, res) => {
     return res.json(newProduct);
 });
 
-app.get("/product/list", isAuthenticated, async (req, res) => {
+app.get("/product/list", async (req, res) => {
     const products = await Product.find({});
-    console.log(products);
+    console.log('products are', products);
     return res.json(products);
 });
 
