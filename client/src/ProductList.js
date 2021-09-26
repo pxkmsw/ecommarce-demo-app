@@ -13,6 +13,11 @@ export default () => {
     console.log(ids);
     const res = await axios.post('http://localhost:8080/product/buy', {ids});
     console.log(res)
+    if(res) {
+      alert('Order is successful ');
+    } else {
+      alert('Order failed ');
+    }
   }
 
   useEffect(() => {
@@ -24,7 +29,7 @@ export default () => {
       <div
         className="card"
         style={{ width: '30%', marginBottom: '20px' }}
-        key={product.id}
+        key={product._id}
       >
         <div className="card-body">
           <h3>{product.name}</h3>
